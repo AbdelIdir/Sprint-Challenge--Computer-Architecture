@@ -35,9 +35,9 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        #memory allocation will be 256
+        # memory allocation will be 256
         self.ram = [0] * 0xFF * 256
-        # Program Counter 
+        # Program Counter
         self.PC = 0
         # Memory Address Register
         self.MAR = None
@@ -162,4 +162,85 @@ class CPU:
             print("File not found")
             sys.exit(2)
 
- 
+    def ALU(self, op, reg_a, reg_b):
+        """ALU operations."""
+        if op == math_op["ADD"]:
+            self.register[reg_a] += self.register[reg_b]
+        elif op == math_op["SUB"]:
+            self.register[reg_a] -= self.register[reg_b]
+        elif op == math_op["MUL"]:
+            self.register[reg_a] *= self.register[reg_b]
+        elif op == math_op["CMP"]:
+            """Compare the values in two registers."""
+            if self.register[self.operand_a] == self.register[self.operand_b]:
+                self.FL = 0b00000001
+            if self.register[self.operand_a] < self.register[self.operand_b]:
+                self.FL = 0b00000100
+            if self.register[self.operand_a] > self.register[self.operand_b]:
+                self.FL = 0b00000010
+        elif op == math_op["AND"]:
+            """Bitwise-AND the values in registerA and registerB, then store the result in registerA."""
+            self.register[self.operand_a] = self.register[self.operand_a] & self.register[self.operand_b]
+        elif op == math_op["OR"]:
+            """Perform a bitwise-OR between the values in registerA and registerB, storing the result in registerA."""
+            self.register[self.operand_a] = self.register[self.operand_a] | self.register[self.operand_b]
+        elif op == math_op["XOR"]:
+            """Perform a bitwise-XOR between the values in registerA and registerB, storing the result in registerA."""
+            self.register[self.operand_a] = self.register[self.operand_a] ^ self.register[self.operand_b]
+        elif op == math_op["NOT"]:
+            """Perform a bitwise-NOT on the value in a register."""
+            self.register[self.operand_a] = ~self.register[self.operand_a]
+        elif op == math_op["SHL"]:
+            """Shift the value in registerA left by the number of bits specified in registerB, filling the low bits with 0."""
+            number_of_bits = self.register[self.operand_b]
+            self.register[self.operand_a] = (
+                self.register[self.operand_a] << number_of_bits) % 255
+        elif op == math_op["SHR"]:
+            """Shift the value in registerA right by the number of bits specified in registerB, filling the high bits with 0."""
+            number_of_bits = self.register[self.operand_b]
+            self.register[self.operand_a] = (
+                self.register[self.operand_a] >> number_of_bits) % 255
+        elif op == math_op["MOD"]:
+            """Divide the value in the first register by the value in the second, storing the _remainder_ of the result in registerA."""
+            self.register[self.operand_a] = self.register[self.operand_a] % self.register[self.operand_b]
+        else:
+            raise Exception("Unsupported ALU operation")
+
+    def trace(self):
+        """
+        Handy function to print out the CPU state. You might want to call this
+        from run() if you need help debugging.
+        """
+        print(f"TRACE: %02X | %02X %02X %02X |" % (
+            self.PC,
+            # self.fl,
+            # self.ie,
+            self.ram_read(self.PC),
+            self.ram_read(self.PC + 1),
+            self.ram_read(self.PC + 2)
+        ), end='')
+        for i in range(8):
+            print(" %02X" % self.register[i], end='')
+
+    def move_PC(self, IR):
+        """Accepts an Instruction Register.\n
+        Increments the PC by the number of arguments returned by the IR."""
+        if (IR << 3) % 255 >> 7 != 1:
+            self.PC += (IR >> 6) + 1
+
+    def run(self):
+        """Run the CPU."""
+        while True:
+            IR = self.ram_read(self.PC)
+            self.operand_a = self.ram_read(self.PC + 1)
+            self.operand_b = self.ram_read(self.PC + 2)
+            if (IR << 2) % 255 >> 7 == 1:
+                self.ALU(IR, self.operand_a, self.operand_b)
+                self.move_PC(IR)
+            elif (IR << 2) % 255 >> 7 == 0:
+                self.instructions[binary_op[IR]]()
+                self.move_PC(IR)
+            else:
+                print(f"{IR} command is invalid")
+                print(self.trace())
+                sys.exit(1)
