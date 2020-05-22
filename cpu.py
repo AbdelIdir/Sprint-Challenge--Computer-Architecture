@@ -1,6 +1,6 @@
 """CPU functionality."""
 import sys
-
+# Operation Tables
 binary_op = {
     0b00000001: 'HLT',
     0b10000010: 'LDI',
@@ -35,9 +35,9 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        # memory allocation will be 256
+        # assign the memory allocation - 256 zeros
         self.ram = [0] * 0xFF * 256
-        # Program Counter
+        # Program Counter >> where calculations/current instructions are executed
         self.PC = 0
         # Memory Address Register
         self.MAR = None
@@ -68,7 +68,7 @@ class CPU:
         self.reg[SP] -= 1
         # assign the address to the instructions
         instruction_address = self.PC + 2
-        # push onto the stack the instructions
+        # push ontu the stack the instructions
         self.ram[self.register[SP]] = instruction_address
         # Assign to Program Counter the address in register
         self.PC = self.register[self.operand_a]
@@ -118,7 +118,7 @@ class CPU:
 
     def POP(self):
         """Pop the value at the top of the stack into the given register"""
-        # get  Stack Pointer in the local scope
+        # get the Stack Pointer in the local scope
         global SP
         # pass to the register the value at the address pointed by the Stack Pointer
         self.register[self.operand_a] = self.ram[self.register[SP]]
@@ -145,7 +145,7 @@ class CPU:
         filename = sys.argv[1]
         try:
             address = 0
-            # open file passed within arguments
+
             with open(filename) as program:
                 # for each instruction in program
                 for instruction in program:
@@ -178,49 +178,6 @@ class CPU:
                 self.FL = 0b00000100
             if self.register[self.operand_a] > self.register[self.operand_b]:
                 self.FL = 0b00000010
-        elif op == math_op["AND"]:
-            """Bitwise-AND the values in registerA and registerB, then store the result in registerA."""
-            self.register[self.operand_a] = self.register[self.operand_a] & self.register[self.operand_b]
-        elif op == math_op["OR"]:
-            """Perform a bitwise-OR between the values in registerA and registerB, storing the result in registerA."""
-            self.register[self.operand_a] = self.register[self.operand_a] | self.register[self.operand_b]
-        elif op == math_op["XOR"]:
-            """Perform a bitwise-XOR between the values in registerA and registerB, storing the result in registerA."""
-            self.register[self.operand_a] = self.register[self.operand_a] ^ self.register[self.operand_b]
-        elif op == math_op["NOT"]:
-            """Perform a bitwise-NOT on the value in a register."""
-            self.register[self.operand_a] = ~self.register[self.operand_a]
-        elif op == math_op["SHL"]:
-            """Shift the value in registerA left by the number of bits specified in registerB, filling the low bits with 0."""
-            number_of_bits = self.register[self.operand_b]
-            self.register[self.operand_a] = (
-                self.register[self.operand_a] << number_of_bits) % 255
-        elif op == math_op["SHR"]:
-            """Shift the value in registerA right by the number of bits specified in registerB, filling the high bits with 0."""
-            number_of_bits = self.register[self.operand_b]
-            self.register[self.operand_a] = (
-                self.register[self.operand_a] >> number_of_bits) % 255
-        elif op == math_op["MOD"]:
-            """Divide the value in the first register by the value in the second, storing the _remainder_ of the result in registerA."""
-            self.register[self.operand_a] = self.register[self.operand_a] % self.register[self.operand_b]
-        else:
-            raise Exception("Unsupported ALU operation")
-
-    def trace(self):
-        """
-        Handy function to print out the CPU state. You might want to call this
-        from run() if you need help debugging.
-        """
-        print(f"TRACE: %02X | %02X %02X %02X |" % (
-            self.PC,
-            # self.fl,
-            # self.ie,
-            self.ram_read(self.PC),
-            self.ram_read(self.PC + 1),
-            self.ram_read(self.PC + 2)
-        ), end='')
-        for i in range(8):
-            print(" %02X" % self.register[i], end='')
 
     def move_PC(self, IR):
         """Accepts an Instruction Register.\n
@@ -241,6 +198,6 @@ class CPU:
                 self.instructions[binary_op[IR]]()
                 self.move_PC(IR)
             else:
-                print(f"{IR} command invalid")
+                print(f"{IR} command is invalid")
                 print(self.trace())
                 sys.exit(1)
