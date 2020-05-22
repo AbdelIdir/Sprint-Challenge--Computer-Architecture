@@ -68,7 +68,7 @@ class CPU:
         self.reg[SP] -= 1
         # assign the address to the instructions
         instruction_address = self.PC + 2
-        # push ontu the stack the instructions
+        # push onto the stack the instructions
         self.ram[self.register[SP]] = instruction_address
         # Assign to Program Counter the address in register
         self.PC = self.register[self.operand_a]
@@ -241,6 +241,6 @@ class CPU:
                 self.instructions[binary_op[IR]]()
                 self.move_PC(IR)
             else:
-                print(f"{IR} command is invalid")
+                print(f"{IR} command invalid")
                 print(self.trace())
                 sys.exit(1)
