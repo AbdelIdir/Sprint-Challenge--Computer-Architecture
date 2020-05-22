@@ -118,7 +118,7 @@ class CPU:
 
     def POP(self):
         """Pop the value at the top of the stack into the given register"""
-        # get the Stack Pointer in the local scope
+        # get  Stack Pointer in the local scope
         global SP
         # pass to the register the value at the address pointed by the Stack Pointer
         self.register[self.operand_a] = self.ram[self.register[SP]]
