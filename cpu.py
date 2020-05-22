@@ -6,25 +6,14 @@ binary_op = {
     0b10000010: 'LDI',
     0b01000111: 'PRN',
     0b01000101: 'PUSH',
-    0b01000110: 'POP',
-    0b01010000: 'CALL',
-    0b00010001: 'RET',
     0b01010100: 'JMP',
     0b01010101: 'JEQ',
     0b01010110: 'JNE',
 }
 math_op = {
-    "ADD": 0b10100000,
-    "SUB": 0b10100001,
-    "MUL": 0b10100010,
+
     'CMP': 0b10100111,
-    'SHL': 0b10101100,
-    'SHR': 0b10101101,
-    'MOD': 0b10100100,
-    'AND': 0b10101000,
-    'OR': 0b10101010,
-    'XOR': 0b10101011,
-    'NOT': 0b01101001
+
 }
 # Stack Pointer
 SP = 7
@@ -55,10 +44,6 @@ class CPU:
         self.instructions['HLT'] = self.HALT
         self.instructions['LDI'] = self.LOAD
         self.instructions['PRN'] = self.PRINT
-        self.instructions['PUSH'] = self.PUSH
-        self.instructions['POP'] = self.POP
-        self.instructions['CALL'] = self.CALL
-        self.instructions['RET'] = self.RET
         self.instructions['JMP'] = self.JMP
         self.instructions['JEQ'] = self.JEQ
         self.instructions['JNE'] = self.JNE
@@ -164,20 +149,11 @@ class CPU:
 
     def ALU(self, op, reg_a, reg_b):
         """ALU operations."""
-        if op == math_op["ADD"]:
-            self.register[reg_a] += self.register[reg_b]
-        elif op == math_op["SUB"]:
-            self.register[reg_a] -= self.register[reg_b]
-        elif op == math_op["MUL"]:
-            self.register[reg_a] *= self.register[reg_b]
-        elif op == math_op["CMP"]:
+
+        if op == math_op["CMP"]:
             """Compare the values in two registers."""
             if self.register[self.operand_a] == self.register[self.operand_b]:
                 self.FL = 0b00000001
-            if self.register[self.operand_a] < self.register[self.operand_b]:
-                self.FL = 0b00000100
-            if self.register[self.operand_a] > self.register[self.operand_b]:
-                self.FL = 0b00000010
 
     def move_PC(self, IR):
         """Accepts an Instruction Register.\n
@@ -197,7 +173,3 @@ class CPU:
             elif (IR << 2) % 255 >> 7 == 0:
                 self.instructions[binary_op[IR]]()
                 self.move_PC(IR)
-            else:
-                print(f"{IR} command is invalid")
-                print(self.trace())
-                sys.exit(1)
